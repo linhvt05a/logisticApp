@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:logistic/db/db_sql.dart';
 import 'package:logistic/screens/home_page.dart';
 import 'package:logistic/screens/login_page.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await DBHelper.initDB();
   runApp(const RootApp());
 }
 

@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
+
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:logistic/controllers/controllers.dart';
+import 'package:logistic/db/db_sql.dart';
+import 'package:logistic/models/spending_list_model.dart';
 import 'package:logistic/screens/home_page.dart';
 import 'package:logistic/utils/utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -28,12 +34,13 @@ class _FormStateState extends State<FormState> {
   final f = DateFormat('dd-MM-yyyy');
   DateTime createAt = DateTime.now();
   late String currenDate = '';
-  final prefs = SharedPreferences.getInstance();
   late Utils utils = Utils();
-  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
-
+  final titleText = TextEditingController();
+  final amountText = TextEditingController();
+  final NoteController _noteController = Get.put(NoteController());
   void backToHome(BuildContext context) {
-    Navigator.push(context, MaterialPageRoute(builder: (_) => const HomePage()));
+    Navigator.push(
+        context, MaterialPageRoute(builder: (_) => const HomePage()));
   }
 
   @override
@@ -48,6 +55,8 @@ class _FormStateState extends State<FormState> {
   void dispose() {
     // TODO: implement dispose
     utils.focusNode.dispose();
+    titleText.dispose();
+    amountText.dispose();
     super.dispose();
   }
 
@@ -58,17 +67,20 @@ class _FormStateState extends State<FormState> {
   }
 
   Future<void> confirmDate(date) async {
-    setState(() {
-      createAt = date;
-    });
+    // setState(() {
+    //   createAt = date;
+    // });
   }
 
-  Future<void> saveData() async {
-    final SharedPreferences prefs = await _prefs;
-    final _createAt = await prefs.setString('createAt', f.format(createAt));
-    if (_createAt) {
-      backToHome(context);
-    }
+  void createNote() async {
+    final _notes = Note(
+        // id: 0,
+        title: titleText.text,
+        amount: amountText.text,
+        createAt: f.format(createAt),
+        isComplete: 0);
+    _noteController.createNote(_notes);
+    backToHome(context);
   }
 
   @override
@@ -81,11 +93,12 @@ class _FormStateState extends State<FormState> {
           child: SizedBox(
             height: 46,
             child: TextFormField(
+                controller: titleText,
                 onTap: () {
                   utils.showKeyBoard();
                 },
                 focusNode: utils.focusNode,
-                autofocus: true,
+                // autofocus: true,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   labelText: 'Tiêu đề ',
@@ -98,10 +111,11 @@ class _FormStateState extends State<FormState> {
           child: SizedBox(
             height: 46,
             child: TextFormField(
+                controller: amountText,
                 onTap: () {
                   utils.showKeyBoard();
                 },
-                focusNode: utils.focusNode,
+                // focusNode: utils.focusNode,
                 autofocus: true,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
@@ -115,7 +129,7 @@ class _FormStateState extends State<FormState> {
             child: SizedBox(
               height: 46,
               child: TextFormField(
-                  focusNode: utils.focusNode,
+                  // focusNode: utils.focusNode,
                   autofocus: true,
                   onTap: () {
                     DatePicker.showDatePicker(context,
@@ -139,7 +153,7 @@ class _FormStateState extends State<FormState> {
           padding: EdgeInsets.symmetric(vertical: 8),
           child: ElevatedButton(
             onPressed: () {
-              saveData();
+              createNote();
             },
             child: Container(
               alignment: Alignment.center,
