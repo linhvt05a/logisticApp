@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
-
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:logistic/controllers/controllers.dart';
-import 'package:logistic/db/db_sql.dart';
+import 'package:logistic/models/priority_list.dart';
 import 'package:logistic/models/spending_list_model.dart';
 import 'package:logistic/screens/home_page.dart';
 import 'package:logistic/utils/utils.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:logistic/widgets/button_style.dart';
+import 'package:logistic/widgets/form_input_field.dart';
 
 class TextFieldForm extends StatelessWidget {
   const TextFieldForm({Key? key}) : super(key: key);
@@ -19,18 +18,18 @@ class TextFieldForm extends StatelessWidget {
     return ListView(
         padding: const EdgeInsets.all(16),
         shrinkWrap: true,
-        children: const [FormState()]);
+        children: const [FormValueState()]);
   }
 }
 
-class FormState extends StatefulWidget {
-  const FormState({Key? key}) : super(key: key);
+class FormValueState extends StatefulWidget {
+  const FormValueState({Key? key}) : super(key: key);
 
   @override
-  _FormStateState createState() => _FormStateState();
+  _FormValueState createState() => _FormValueState();
 }
 
-class _FormStateState extends State<FormState> {
+class _FormValueState extends State<FormValueState> {
   final f = DateFormat('dd-MM-yyyy');
   DateTime createAt = DateTime.now();
   late String currenDate = '';
@@ -38,8 +37,16 @@ class _FormStateState extends State<FormState> {
   final titleText = TextEditingController();
   final amountText = TextEditingController();
   final NoteController _noteController = Get.put(NoteController());
+  final List<NoteColors> priority = [
+    NoteColors(id: 1, colors: Colors.green),
+    NoteColors(id: 2, colors: Colors.red),
+    NoteColors(id: 3, colors: Colors.yellow)
+  ];
+
+  final _formKey = GlobalKey<FormState>();
+
   void backToHome(BuildContext context) {
-    Navigator.push(
+    Navigator.pushReplacement(
         context, MaterialPageRoute(builder: (_) => const HomePage()));
   }
 
@@ -47,7 +54,7 @@ class _FormStateState extends State<FormState> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    currenDate = f.format(createAt) ?? currenDate;
+    currenDate = f.format(createAt);
     utils.focusNode = FocusNode();
   }
 
@@ -67,14 +74,13 @@ class _FormStateState extends State<FormState> {
   }
 
   Future<void> confirmDate(date) async {
-    // setState(() {
-    //   createAt = date;
-    // });
+    setState(() {
+      createAt = date;
+    });
   }
 
-  void createNote() async {
+  Future<void> createNote() async {
     final _notes = Note(
-        // id: 0,
         title: titleText.text,
         amount: amountText.text,
         createAt: f.format(createAt),
@@ -86,83 +92,51 @@ class _FormStateState extends State<FormState> {
   @override
   Widget build(BuildContext context) {
     return Form(
+        key: _formKey,
         child: Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: SizedBox(
-            height: 46,
-            child: TextFormField(
-                controller: titleText,
-                onTap: () {
-                  utils.showKeyBoard();
-                },
-                focusNode: utils.focusNode,
-                // autofocus: true,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Tiêu đề ',
-                  hintText: 'ex: Tiết kiệm tiền mua Macbook Pro ...  ',
-                )),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: SizedBox(
-            height: 46,
-            child: TextFormField(
-                controller: amountText,
-                onTap: () {
-                  utils.showKeyBoard();
-                },
-                // focusNode: utils.focusNode,
-                autofocus: true,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Số tiền ',
-                  hintText: 'ex: 8.000.000.000 đ',
-                )),
-          ),
-        ),
-        Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: SizedBox(
-              height: 46,
-              child: TextFormField(
-                  // focusNode: utils.focusNode,
-                  autofocus: true,
-                  onTap: () {
-                    DatePicker.showDatePicker(context,
-                        showTitleActions: true,
-                        minTime: DateTime(2021, 1),
-                        maxTime: DateTime(2050, 12),
-                        theme: const DatePickerTheme(), onChanged: (date) {
-                      onChangeDate(date);
-                    }, onConfirm: (date) {
-                      confirmDate(date);
-                    });
-                  },
-                  decoration: InputDecoration(
-                      border: const OutlineInputBorder(),
-                      labelText: 'Ngày tạo ',
-                      hintText: f.format(createAt) ?? currenDate
-                      // hintText: createAt
-                      )),
-            )),
-        Padding(
-          padding: EdgeInsets.symmetric(vertical: 8),
-          child: ElevatedButton(
-            onPressed: () {
-              createNote();
-            },
-            child: Container(
-              alignment: Alignment.center,
-              child: const Text('Lưu '),
-              height: 46,
+          children: [
+            FormInputField(
+              onTap: () {},
+              controller: titleText,
+              labelText: 'Tiêu đề',
+              hintText: 'Eg: Đi xem phim...',
+              focusNode: utils.focusNode,
             ),
-          ),
-        )
-      ],
-    ));
+            FormInputField(
+                onTap: () {},
+                controller: amountText,
+                labelText: 'Số tiền phải chi ',
+                hintText: 'Eg: 8.888.888'),
+            FormInputField(
+              labelText: 'Ngày chi',
+              hintText: currenDate,
+              focusNode: utils.focusNode,
+              onTap: () async {
+                createAt = (await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime(2021),
+                    lastDate: DateTime(2050)))!;
+                setState(() {
+                  currenDate = f.format(createAt);
+                });
+              },
+            ),
+            StyledButton(
+              onPress: () {
+                if (titleText.text == "" || amountText.text == "") {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text('Some field invalid '),
+                        backgroundColor: Colors.red),
+                  );
+                } else {
+                  createNote();
+                }
+              },
+              title: 'Lưu',
+            )
+          ],
+        ));
   }
 }

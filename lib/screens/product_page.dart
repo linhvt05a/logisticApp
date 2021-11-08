@@ -18,9 +18,9 @@ class Product extends StatelessWidget {
       ),
       body: ListView(
         children: [
-          CardData(onPress:(){
-            navigateToProductDetail(context);
-          })
+          // CardData(onPress:(){
+          //   navigateToProductDetail(context);
+          // })
         ],
       ),
     );

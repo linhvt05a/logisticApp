@@ -39,6 +39,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home'),
+        automaticallyImplyLeading: false,
       ),
       body: Container(child: _buildList(context)),
       floatingActionButton: FloatingActionButton(
@@ -55,7 +56,7 @@ class _HomePageState extends State<HomePage> {
       itemCount: _notes.length,
       itemBuilder: (context, index) {
         final _data = _notes[index];
-        return CardData(
+        return CardItem(
             onPress: () async {
               _noteController.deleteNote(_data.id!);
               getData();

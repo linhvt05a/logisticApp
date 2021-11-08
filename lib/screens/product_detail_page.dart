@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:logistic/widgets/card_data.dart';
 
 class ProductDetail extends StatelessWidget {
   const ProductDetail({Key? key}) : super(key: key);
@@ -12,7 +11,7 @@ class ProductDetail extends StatelessWidget {
       ),
       body: ListView(
         children: const [
-          CardData()
+          // CardData()
         ],
       ),
     );

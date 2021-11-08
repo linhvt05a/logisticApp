@@ -23,6 +23,7 @@ class Note {
       'isComplete': isComplete,
     };
   }
+
   @override
   String toString() {
     return '{id: $id, title: $title, amount: $amount,createAt: $createAt,isComplete: $isComplete}';
